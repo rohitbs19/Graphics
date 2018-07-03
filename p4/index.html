@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="description" content="Pose">
+  <meta charset="utf-8">
+  <title>sky scrapers</title>
+  <h1>Dubai Twin Towers</h1>
+  <div class = "centerCan">
+  <canvas id="myCanvas"
+	   width="500" height="500"
+	   style="border:1px solid #000;">
+  </canvas><br/>
+  </div>
+<div class = "camera">
+  <h3>Transforms</h3>
+  <input id="slider1" type="range" min="-100" max="100" /> Rotate Landscape Horizontally
+  <br>
+  <input id="slider2" type="range" min="-100" max="100" /> Rotate Object In a Loop
+  <br>
+  <input id="slider3" type="range" min="-100" max="100" list="tickmarks" /> along X continuous motion
+  <datalist id="tickmarks">
+  <option value="0" label="0%">
+  <option value="10">
+  <option value="20">
+  <option value="30">
+  <option value="40">
+  <option value="50" label="50%">
+  <option value="60">
+  <option value="70">
+  <option value="80">
+  <option value="90">
+  <option value="100" label="100%">
+</datalist>
+  <br>
+  <h3>Camera Operations (getting the objects too close to camera would result in erroneous drawing)</h3>
+  <input id = "redBox" type ="checkbox"/> color static objs using Distance
+  <br>
+  <input id="slider8" type="range" min="50" max="150" /> Field Of View
+  <br>
+  <input id="slider12" type="range" min="-400" max="400" /> at X
+  <br>
+  <input id="slider13" type="range" min="-400" max="400" /> at Y
+  <br>
+  <input id="slider14" type="range" min="-400" max="400" /> at Z
+  <br>
+  <input id="slider9" type="range" min="-1000" max="1000" /> from X
+  <br>
+  <input id="slider10" type="range" min="-400" max="400" /> from Y
+  <br>
+  <input id="slider11" type="range" min="-400" max="400" />  doesn't apply
+  <br>
+
+
+  <img src = "gold.jpg" style = "display:none" id = "gold">
+  <img src = "brick.jpg" style = "display:none" id = "brick">
+
+
+
+</div>
+
+  <script>
+  	var currImage = 0;
+  	function changeImage(){
+  		currImage += 1;
+
+  		document.getElementById("myCanvas").style = "background-image: url(\"" + currImage + ".jpg\")";
+
+  		if(currImage > 4){
+  			currImage = 0;
+  		}
+
+  	}
+  </script>
+     <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
+  <script src = "canvas.js"></script>
+
+
+  <style>
+
+	#myCanvas {
+    	background-color: #F0FFFF;
+	}
+
+	h1 {
+   	 	color: Black;
+   	 	font-size: 25px;
+	}
+
+	.centerCan{
+		position:relative;
+ 	 	top: 0px;
+  	left:0px;
+    display: inline-block;
+	}
+  .camera{
+    display: inline-block;
+    background-color: #F0FFFF;
+  }
+
+  body{
+    background-repeat: no-repeat;
+  }
+</style>
+
+
+
+
+</head>
+<body>
+
+</body>
+</html>

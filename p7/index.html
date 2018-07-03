@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Graphics town framework code by Mike Gleicher
+  -- written October, 2015
+  -->
+<head>
+    <meta charset="UTF-8">
+    <title>GraphicsTown JS 2015!</title>
+</head>
+<body>
+<img id = "MidTexture" src="midTexture.jpg" width="0" height="0">
+<img id = "PillerTexture" src="pillerTexture.jpeg" width="0" height="0">
+<img id = "GuardTexture" src="guardTexture.jpg" width="0" height="0">
+<img id = "ModernHouseTexture" src="HouseTexture.png" width="0" height="0">
+<!-- load this stuff first -->
+<script src="Libraries/gl-matrix.js"></script>
+<script src="Libraries/twgl-full.js"></script>
+<script src="Libraries/panel.js"></script>
+<script src="Libraries/arcball.js"></script>
+
+
+<!--
+scripts for the buildings
+-->
+
+
+<!--
+sample
+-->
+
+<script src="grobject.js"></script>
+<script src="ExampleObjects/ground.js"></script>
+<!--
+loading models
+-->
+<script src="Models.js"></script>
+<!--
+
+end-->
+<!--
+scripts for the buildings
+-->
+<script src="building1_cylinder.js"></script>
+<script src="piller.js"></script>
+<script src="guard.js"></script>
+<script src="modernHouse.js"></script>
+<script src="burj.js"></script>
+<script src="helliBody.js"></script>
+<script src="emirateTower.js"></script>
+
+<!--
+json files end
+-->
+<script src="building_notex.js"></script>
+<script src="building.js"></script>
+
+<!-- This is where we load the objects for the world -->
+<script src="ExampleObjects/simplest.js"></script>
+<script src="ExampleObjects/texturedplane.js"></script>
+<script src="ExampleObjects/cube.js"></script>
+
+<!-- I am adding the helicopter -->
+<script src="Helicopter/helicopter.js"></script>
+
+<!-- This gets loaded LAST (actually, it probably doesn't have to) -->
+<script src="graphicstown.js"></script>
+</body>
+
+<!-- all of the shaders get stuck here in the HTML because
+  -- that's the only way I know to load them without either
+  -- sticking them in JavaScript strings, or using a web server
+  -->
+<script src="image_src.js"></script>
+<script id="cube-vs" type="notjs">
+// specialized shader for the simple cube
+// we assume that the model matrix works as the normal
+//      matrix - this only is try if the model matrix
+//      it a rotate/translate
+//      (uniform scale is OK since we re-normalize)
+// color is solid
+// simple lighting
+    precision highp float;
+
+    attribute vec3 vpos;
+    attribute vec3 vnormal;
+    varying vec3 outColor;
+
+    uniform mat4 view;
+    uniform mat4 proj;
+    uniform mat4 model;
+    uniform vec3 lightdir;
+    uniform vec3 cubecolor;
+
+
+    void main(void) {
+        gl_Position = proj * view * model * vec4(vpos, 1.0);
+        vec4 normal = normalize(model * vec4(vnormal,0.0));
+        float diffuse = .5 + .5*abs(dot(normal, vec4(lightdir,0.0)));
+        outColor = cubecolor * diffuse;
+    }
+</script>
+<!--
+decide on the appropriate shader to use here
+-->
+
+<script id="cube-fs" type="notjs">
+// simple shader that does vertex coloring
+//  (e.g. the vertex shader figures the lighting
+// note this is used for more than just the cube
+    precision highp float;
+    varying vec3 outColor;
+    void main(void) {
+        gl_FragColor = vec4(outColor, 1.0);
+    }
+</script>
+<script id="heli-vs" type="notjs">
+// specialized shader for the simple cube
+// we assume that the model matrix works as the normal
+//      matrix - this only is try if the model matrix
+//      it a rotate/translate
+//      (uniform scale is OK since we re-normalize)
+// color is solid
+// simple lighting
+    precision mediump float;
+										uniform mat4 proj;
+										uniform mat4 view;
+										uniform mat4 model;
+
+
+										attribute vec3 vpos;
+										attribute vec3 vnormal;
+
+
+										varying vec3 fPos;
+										varying vec3 fNorm;
+
+
+    void main()
+    {
+        fPos = (model * vec4(vpos, 1.0)).xyz;
+        fNorm = (model * vec4(vnormal, 0.0)).xyz;
+        gl_Position = proj * view * vec4(fPos, 1.0);
+    }
+</script>
+<!--
+decide on the appropriate shader to use here
+-->
+
+<script id="heli-fs" type="notjs">
+// simple shader that does vertex coloring
+//  (e.g. the vertex shader figures the lighting
+// note this is used for more than just the cube
+   precision mediump float;
+    uniform vec3 lightdir;
+    uniform vec4 cubecolor;
+
+    varying vec3 fPos;
+    varying vec3 fNorm;
+
+    const vec3  var_color = vec3(8.0,7.0,2.0);
+
+	//phong lighting snippet
+	const float Ka         = 0.5;
+	const float Kd         = 0.3;
+	const float Ks         = 0.3;
+	const float sExp       = 40.0;
+
+	const vec3  lightCol   = vec3(1.0,1.0,1.0);
+	  
+
+
+    void main()
+    {
+        vec3 toLightNormal = normalize(lightdir - fPos);
+
+        /*float lightIntensity = 0.8 + 0.4 * max(dot(fNorm, toLightNormal), 0.0);
+
+        gl_FragColor = vec4(meshColor.rgb * lightIntensity, meshColor.a);*/
+
+        vec3 s=normalize(lightdir);
+		vec3 n=normalize(fNorm);
+		vec3 v=normalize(-fPos);
+		vec3 h=normalize(v+s);
+
+
+
+		//float rand = fract(cos(dot(pos ,vec2(sin(time), 2.0*cos(time)))) *sin(time)* 999.0);;
+		//vec3 color = vec3(abs(sin( 20.0 * pos.y)),rand+sin(rand),rand+cos(rand));
+		//vec3  color_model  = vec3(fNorm.x,fNorm.y,1.0);
+		vec3 amb  = Ka*cubecolor.xyz;
+		vec3 dif  = Kd*cubecolor.xyz*dot(s,n);
+		
+		vec3 spec = Ks*lightCol*pow(max(dot(h,n),0.0),sExp);
+		
+		gl_FragColor = vec4( dif +spec + amb , 1.0);
+    }
+</script>
+
+<!-- Special Ground Plane Shader - makes a boring
+  -- checkerboard
+  -->
+<script id="ground-vs" type="not-js">
+    precision highp float;
+
+    attribute vec3 vpos;
+    varying vec3 outPos;
+	varying vec3 flashLight;
+    uniform mat4 view;
+    uniform mat4 proj;
+	uniform vec3 flashlightPos;
+    void main(void) {
+        gl_Position = proj * view * vec4(vpos, 1.0);
+        outPos = vpos;
+		flashLight = flashlightPos;
+    }
+</script>
+<script id="ground-fs" type="notjs">
+    // note this is used for more than just the cube
+    precision highp float;
+    varying vec3 outPos;
+	varying vec3 flashLight;
+
+    //took reference from: https://webglfundamentals.org/webgl/lessons/webgl-3d-lighting-spot.html
+	vec3 flash(vec3 pos) {
+        float culminate = dot(normalize(pos - flashLight), normalize(-flashLight));
+        if (culminate >= 0.93 && length(pos - flashLight) < 60.0) {
+            float length = length(pos - flashLight);
+            float lightPow = .1 + .3*pow((60.0 - length)/60.0, 4.0) + pow(((culminate - 0.95)/0.05), 4.0)*.2;
+            return vec3(lightPow, lightPow, lightPow);
+        }
+        return vec3(0,0,0);
+    }
+    void main(void) {
+        
+        gl_FragColor = vec4(0.259, 0.278, 0.341, 1.0) + vec4(flash(outPos), 0.0);
+
+    }
+</script>
+<script id="buildingVs" type="not-js">
+        precision mediump float;
+        uniform mat4 mProj;
+        uniform mat4 mView;
+        uniform mat4 mWorld;
+        attribute vec2 vertTexCoord; // added attrib
+        attribute vec3 vPos;
+        attribute vec3 vNorm;
+        varying vec3 fPos;
+        varying vec3 fNorm;
+        varying vec2 fragTexCoord; // added varying
+        void main()
+        {
+            fragTexCoord = vertTexCoord;
+            fPos = (mWorld * vec4(vPos, 1.0)).xyz;
+            fNorm = (mWorld * vec4(vNorm, 0.0)).xyz;
+            gl_Position = mProj * mView * vec4(fPos, 1.0);
+        }
+</script>
+<script id="buildingFs" type="not-js">
+        precision mediump float;
+        uniform vec3 pointLightPosition;
+        uniform vec4 meshColor;
+        uniform sampler2D sampler; // added uniform for texture
+        varying vec3 fPos;
+        varying vec3 fNorm;
+        varying vec2 fragTexCoord; // added the varying from vertex Shader
+
+        void main()
+        {
+            vec3 toLightNormal = normalize(pointLightPosition - fPos);
+            float lightIntensity =  1.0 +0.4 * max(dot(fNorm, pointLightPosition),0.0);
+            gl_FragColor = lightIntensity * texture2D(sampler, fragTexCoord);
+        }
+</script>
+<script id="buildingVsNoTex" type="not-js">
+        precision mediump float;
+        uniform mat4 mProj;
+        uniform mat4 mView;
+        uniform mat4 mWorld;
+
+        attribute vec3 vPos;
+        attribute vec3 vNorm;
+        varying vec3 fPos;
+        varying vec3 fNorm;
+
+        void main()
+        {
+
+            fPos = (mWorld * vec4(vPos, 1.0)).xyz;
+            fNorm = (mWorld * vec4(vNorm, 0.0)).xyz;
+            gl_Position = mProj * mView * vec4(fPos, 1.0);
+        }
+</script>
+
+<script id="buildingFsNoTex" type="not-js">
+        precision mediump float;
+        uniform vec3 pointLightPosition;
+        uniform vec4 meshColor;
+       // added uniform for texture
+        varying vec3 fPos;
+        varying vec3 fNorm;
+        // added the varying from vertex Shader
+
+        void main()
+        {
+            vec3 toLightNormal = normalize(pointLightPosition - fPos);
+            float lightIntensity = 0.6 + 0.4 * max(dot(fNorm, toLightNormal), 0.0);
+           gl_FragColor = vec4(meshColor.rgb * lightIntensity, meshColor.a);
+        }
+</script>
+
+</html>

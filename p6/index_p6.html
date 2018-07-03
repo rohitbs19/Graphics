@@ -1,0 +1,209 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body onload="Init();">
+<!-- Add your site or application content here -->
+<!--   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+<canvas id="glCanvas" width="600", height="600"></canvas>
+
+
+<script id="vs" type="not-js">
+
+    precision mediump float;
+    uniform mat4 mProj;
+    uniform mat4 mView;
+    uniform mat4 mWorld;
+
+    attribute vec3 vPos;
+    attribute vec3 vNorm;
+
+    varying vec3 fPos;
+    varying vec3 fNorm;
+    varying vec3 Varying_surfaceToView;
+
+    void main()
+    {
+        fPos = (mWorld * vec4(vPos, 1.0)).xyz;
+        fNorm = (mWorld * vec4(vNorm, 0.0)).xyz;
+
+        gl_Position = mProj * mView * vec4(fPos, 1.0);
+    }
+          </script>
+
+<script id="fs" type="not-js">
+
+    precision mediump float;
+    uniform vec3 pointLightPosition;
+    uniform vec4 meshColor;
+    uniform float time;
+    uniform vec2 resolution;
+    varying vec3 fPos;
+    varying vec3 fNorm;
+    const vec3  var_color = vec3(5.0,7.0,9.0);
+
+//phong lighting snippet
+const float Ka         = 0.3;
+const float Kd         = 0.8;
+const float Ks         = 1.5;
+const float sExp       = 50.0;
+const vec3  lightPos   = vec3(100.0,100.0,0.0);
+const vec3  lightCol   = vec3(5.0,0.5,0.0);
+
+    void main()
+    {
+        vec3 toLightNormal = normalize(pointLightPosition - fPos);
+
+        /*float lightIntensity = 0.8 + 0.4 * max(dot(fNorm, toLightNormal), 0.0);
+
+        gl_FragColor = vec4(meshColor.rgb * lightIntensity, meshColor.a);*/
+
+        vec3 s=normalize(lightPos-fPos);
+  vec3 n=normalize(fNorm);
+  vec3 v=normalize(-fPos);
+  vec3 h=normalize(v+s);
+  vec2 pos = gl_FragCoord.xy/resolution;
+
+
+  float rand = fract(cos(dot(pos ,vec2(sin(time), 2.0*cos(time)))) *sin(time)* 999.0);;
+  vec3 color = vec3(abs(sin( 20.0 * pos.y)),rand+sin(rand),rand+cos(rand));
+  vec3  color_model  = vec3(fNorm.x,fNorm.y,1.0);
+  vec3 ambientColor  = Ka*color_model;
+  vec3 diffuseColor  = Kd*color_model*dot(s,n);
+   vec3 specularColor = Ks*lightCol*pow(max(dot(h,n),0.0),sExp);
+  gl_FragColor = vec4((diffuseColor * color * var_color) +specularColor + ambientColor, 1);
+    }
+</script>
+<script id="vsTable" type="not-js">
+
+    precision mediump float;
+    uniform mat4 mProj;
+    uniform mat4 mView;
+    uniform mat4 mWorld;
+
+    attribute vec3 vPos;
+    attribute vec3 vNorm;
+
+    varying vec3 fPos;
+    varying vec3 fNorm;
+    varying vec3 Varying_surfaceToView;
+
+    void main()
+    {
+        fPos = (mWorld * vec4(vPos, 1.0)).xyz;
+        fNorm = (mWorld * vec4(vNorm, 0.0)).xyz;
+
+        gl_Position = mProj * mView * vec4(fPos, 1.0);
+    }
+          </script>
+<script id = "fsTable" type="not-js" >
+     precision mediump float;
+      uniform float time;
+    uniform vec2 resolution;
+    uniform vec3 pointLightPosition;
+    uniform vec4 meshColor;
+    varying vec3 fPos;
+    varying vec3 fNorm;
+    void main()
+    {
+        vec3 toLightNormal = normalize(pointLightPosition - fPos);
+        /*float lightIntensity = 0.8 + 0.4 * max(dot(fNorm, toLightNormal), 0.0);
+        gl_FragColor = vec4(meshColor.rgb * lightIntensity, meshColor.a);*/
+
+        vec2 coords = gl_FragCoord.xy/resolution;
+
+  vec3 direction = vec3(sin(time*60.0 * coords.y),cos(time*40.0 * coords.x),1); // Lighting
+  float var = fract(sin(dot(coords ,vec2(0.0, 0.0))) * 999.0);;
+  vec3 color = vec3(abs(sin(time * 20.0 * coords.y)),var+sin(var),var+cos(var)); // Color
+  float diffuse = 0.1 + dot(fNorm,direction);
+  gl_FragColor = vec4(diffuse * color , 1);
+    }
+</script>
+<script id="vsCube" type="not-js">
+
+precision mediump float;
+attribute vec3 vertPosition;
+attribute vec3 vertColor;
+varying vec3 fragColor;
+uniform mat4 mWorld;
+uniform mat4 mView;
+uniform mat4 mProj;
+uniform float time;
+
+void main()
+{
+  fragColor = vertColor;
+   mat4 model;
+
+    float theta = 3.1415 / 0.2*sin(time*3.0*0.02);
+
+  mat4 rotMatrix =  mat4(  cos( theta ),  0.0 ,       -sin( theta ),          0.0,
+    	                    0.0, 1.0,0.0, 0.0,
+			                    sin( theta ),0.0, cos( theta ), 0.0,
+				                  0.0,         0.0,      0.0,       1.0 );
+
+  model = mView*rotMatrix ;
+  gl_Position = mProj * model * mWorld * vec4(vertPosition, 1.0);
+}
+</script>
+<script id="fsCube" type="not-js">
+
+precision mediump float;
+
+varying vec3 fragColor;
+void main()
+{
+  gl_FragColor = vec4(fragColor, 1.0);
+}
+</script>
+
+<datalist id="tickmarks">
+    <option value="0" label="0%">
+    <option value="10">
+    <option value="20">
+    <option value="30">
+    <option value="40">
+    <option value="50" label="50%">
+    <option value="60">
+    <option value="70">
+    <option value="80">
+    <option value="90">
+    <option value="100" label="100%">
+</datalist>
+<br>
+<br>
+<input id="slider4" type="range" min="50" max="150" /> Field Of View
+<br>
+<input id="slider5" type="range" min="-10" max="10" list="tickMarks" /> camera forward/backward
+<br>
+<input id="slider6" type="range" min="-10" max="10" /> camera right/left
+<br>
+<input id="slider7" type="range" min="-10" max="10" /> camera up/down
+<br>
+<input id="slider8" type="range" min="-1000" max="1000" /> rotate right/left
+<br>
+<input id="slider9" type="range" min="-400" max="400" /> from Y
+<br>
+<input id="slider10" type="range" min="-400" max="400" />  doesn't apply
+<br>
+
+<script src="data.js"></script>
+<script src="cube.js"></script>
+<script src="chair.js"></script>
+<script src="monitor.js"></script>
+<script src="PlaneAndTable.js"></script>
+<script src="gl-matrix.js"></script>
+<script src="app.js"></script>
+<script src="Models.js"></script>
+<script src="SceneEx.js"></script>
+<script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
+<!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
+
+
+</body>
+</html>

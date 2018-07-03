@@ -1,0 +1,35 @@
+
+
+
+
+
+
+Basic Shader:
+
+description: please wait for atleast a minute to let the monkey settle and observe the patterns applied.
+these are meant to emulate an optical illusion (the line don't seem to be moving until we observe the ends).
+
+Link: https://goo.gl/BtBCcf
+
+Fancy Shader:
+Description: create an interesting pattern on the surface. makes use of specular, diffusion, and ambient lighting.
+Link: https://goo.gl/FcUZxQ
+
+PLEASE CHECK THESE INTERESTING SHADERS AS WELL:
+1: peeking monkey: the monkey peeks at the viewer :p (interesting motion)
+	
+https://goo.gl/qP2DJf
+
+2: size changing: this is an outrageous piece of art
+
+https://goo.gl/qP2DJf
+
+I personally feel the best one is the peeking monkey but the pattern in the Fancy Shader is interesting
+********************************************************************************************************
+
+
+
+
+
+
+
